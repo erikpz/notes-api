@@ -1,28 +1,13 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
+const { Note } = require("./models/Note");
+require("dotenv").config();
 
 app.use(express.json());
+app.use(cors());
 
-let notes = [
-  {
-    id: 1,
-    content: "First Note",
-    important: false,
-    date: new Date().toUTCString(),
-  },
-  {
-    id: 2,
-    content: "Second Note",
-    important: false,
-    date: new Date().toUTCString(),
-  },
-  {
-    id: 3,
-    content: "Task 1",
-    important: false,
-    date: new Date().toUTCString(),
-  },
-];
+const notes = [];
 
 app.get("/", (request, response) => {
   response.json({
@@ -30,50 +15,70 @@ app.get("/", (request, response) => {
   });
 });
 
-app.get("/getAll", (request, response) => {
-  response.json(notes);
-});
-
-app.get("/getOne/:id", (request, response) => {
-  const paramId = +request.params.id;
-  const note = notes.find((n) => n.id === paramId);
-  if (!note) {
-    return response.status(404).json({
-      message: "Note not exists",
+app.get("/getAll", async (request, response) => {
+  try {
+    const result = await Note.find({});
+    response.json(result);
+  } catch (err) {
+    return response.status(500).json({
+      message: err,
     });
   }
-  return response.json(note);
 });
 
-app.delete("/deleteOne/:id", (request, response) => {
-  const paramId = +request.params.id;
-  const note = notes.find((n) => n.id === paramId);
-  if (!note) {
-    return response.status(404).json({
-      message: "Note not exists",
+app.get("/getOne/:id", async (request, response) => {
+  const paramId = request.params.id;
+  try {
+    const note = await Note.findById(paramId);
+    if (!note) {
+      return response.status(404).json({
+        message: "Note with that id does not exists",
+      });
+    }
+    return response.json(note);
+  } catch (err) {
+    return response.status(500).json({
+      message: err,
     });
   }
-  const notesAfter = notes.filter((n) => n.id !== paramId);
-  notes = notesAfter;
-  return response.json(notesAfter);
 });
 
-app.post("/create", (request, response) => {
+app.delete("/deleteOne/:id", async (request, response) => {
+  const paramId = request.params.id;
+  try{
+    const note = await Note.findByIdAndDelete(paramId)
+    if (!note) {
+      return response.status(404).json({
+        message: "Note with that id does not exists",
+      });
+    }
+    return response.json(note)
+  }catch(err){
+    console.log(err)
+    response.status(500).json({
+      message: err
+    })
+  }
+});
+
+app.post("/create", async (request, response) => {
   let newNote = request.body;
-  const maxId = Math.max(...notes.map((n) => n.id));
-  newNote = {
-    ...newNote,
-    id: maxId + 1,
-    date: new Date().toUTCString(),
-  };
-  notes = [...notes, newNote];
-  response.json({
-    message: "Created",
-    note: newNote,
+  const note = new Note({
+    content: newNote.content,
+    important: newNote.important,
+    date: new Date(),
   });
+  try {
+    const res = await note.save();
+    return response.json(res)
+  } catch (err) {
+    return response.status(500).json({
+      message: "",
+    });
+  }
 });
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
   console.log("Backend running in port " + PORT);
