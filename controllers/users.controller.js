@@ -1,4 +1,6 @@
 const { response } = require("express");
+const bcrypt = require("bcrypt");
+const User = require("../models/user.model");
 
 const getUsers = (req, res = response) => {
   const { id } = req.query;
@@ -9,12 +11,27 @@ const getUsers = (req, res = response) => {
   });
 };
 
-const createUser = (req, res = response) => {
-  const { name, lastname, email, password } = req.body;
+const createUser = async (req, res = response) => {
+  const { name, lastname, email, password, role, profileImage } = req.body;
+
+  const newUser = new User({
+    name,
+    lastname,
+    email,
+    password,
+    role,
+    profileImage,
+  });
+
+  const salt = bcrypt.genSaltSync();
+  newUser.password = bcrypt.hashSync(password, salt);
+
+  await newUser.save();
 
   res.json({
-    massage: "POST USERS",
-    data: { name, lastname, email, password },
+    ok: true,
+    massage: "User created",
+    data: newUser,
   });
 };
 
