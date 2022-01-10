@@ -6,7 +6,8 @@ const getUsers = (req, res = response) => {
   const { id } = req.query;
 
   res.json({
-    massage: "GET USERS",
+    ok: true,
+    message: "GET USERS",
     data: { id: id ?? "All users" },
   });
 };
@@ -23,6 +24,16 @@ const createUser = async (req, res = response) => {
     profileImage,
   });
 
+  const emailExists = await User.findOne({ email });
+
+  if (emailExists) {
+    return res.status(400).json({
+      ok: false,
+      message: "Email already exists!",
+      data: {},
+    });
+  }
+
   const salt = bcrypt.genSaltSync();
   newUser.password = bcrypt.hashSync(password, salt);
 
@@ -30,7 +41,7 @@ const createUser = async (req, res = response) => {
 
   res.json({
     ok: true,
-    massage: "User created",
+    message: "User created",
     data: newUser,
   });
 };
@@ -39,14 +50,16 @@ const updateUser = (req, res = response) => {
   const { id } = req.params;
 
   res.json({
-    massage: "UPDATE USERS",
+    ok: true,
+    message: "UPDATE USERS",
     data: { id },
   });
 };
 
 const deleteUser = (req, res = response) => {
   res.json({
-    massage: "DELETE USERS",
+    ok: true,
+    message: "DELETE USERS",
     data: {},
   });
 };

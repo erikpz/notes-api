@@ -20,7 +20,7 @@ const userSchema = new Schema({
   },
   profileImage: {
     type: String,
-    default:""
+    default: "",
   },
   role: {
     type: String,
@@ -28,6 +28,11 @@ const userSchema = new Schema({
     enum: ["ADMIN_ROLE", "USER_ROLE"],
   },
 });
+
+userSchema.methods.toJSON = function () {
+  const { __v, password, ...newUser } = this.toObject();
+  return newUser;
+};
 
 const userModel = model("User", userSchema);
 
