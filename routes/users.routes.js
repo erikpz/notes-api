@@ -7,8 +7,7 @@ const {
   deleteUser,
 } = require("../controllers/users.controller");
 const { validateFields } = require("../middlewares/validate-fields");
-const Role = require("../models/role.model");
-const { roleValidation } = require("../utils/db-validators");
+const { roleValidation, emailValidation } = require("../utils/db-validators");
 
 const routerUsers = Router();
 
@@ -18,6 +17,7 @@ routerUsers.post(
   [
     check("email", "Email is required").not().isEmpty(),
     check("email", "Email is not valid").isEmail(),
+    check("email").custom(emailValidation),
     check("password", "Password must be min 5 characters, max 15").isLength({
       min: 5,
       max: 15,

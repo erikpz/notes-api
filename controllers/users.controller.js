@@ -13,37 +13,35 @@ const getUsers = (req, res = response) => {
 };
 
 const createUser = async (req, res = response) => {
-  const { name, lastname, email, password, role, profileImage } = req.body;
+  try {
+    const { name, lastname, email, password, role, profileImage } = req.body;
 
-  const newUser = new User({
-    name,
-    lastname,
-    email,
-    password,
-    role,
-    profileImage,
-  });
+    const newUser = new User({
+      name,
+      lastname,
+      email,
+      password,
+      role,
+      profileImage,
+    });
 
-  const emailExists = await User.findOne({ email });
+    const salt = bcrypt.genSaltSync();
+    newUser.password = bcrypt.hashSync(password, salt);
 
-  if (emailExists) {
-    return res.status(400).json({
+    await newUser.save();
+
+    res.json({
+      ok: true,
+      message: "User created",
+      data: newUser,
+    });
+  } catch (err) {
+    res.status(500).json({
       ok: false,
-      message: "Email already exists!",
-      data: {},
+      message: "Server error",
+      data: err,
     });
   }
-
-  const salt = bcrypt.genSaltSync();
-  newUser.password = bcrypt.hashSync(password, salt);
-
-  await newUser.save();
-
-  res.json({
-    ok: true,
-    message: "User created",
-    data: newUser,
-  });
 };
 
 const updateUser = (req, res = response) => {
