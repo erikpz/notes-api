@@ -5,7 +5,7 @@ const validateFields = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({
       ok: false,
-      message: "Operation failed!",
+      message: "Validationfailed",
       data: errors,
     });
   }

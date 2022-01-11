@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { check } = require("express-validator");
+const { check, query } = require("express-validator");
 const {
   getUsers,
   createUser,
@@ -7,14 +7,28 @@ const {
   deleteUser,
 } = require("../controllers/users.controller");
 const { validateFields } = require("../middlewares/validate-fields");
-const { roleValidation, emailValidation } = require("../utils/db-validators");
+const {
+  roleValidation,
+  emailValidation,
+  userExists,
+} = require("../utils/db-validators");
 
 const routerUsers = Router();
 
-routerUsers.get("/", getUsers);
+routerUsers.get(
+  "/",
+  [
+    query("amount", "Must be an number").optional().isNumeric(),
+    query("page", "Must be an number").optional().isNumeric(),
+    validateFields,
+  ],
+  getUsers
+);
 routerUsers.post(
   "/",
   [
+    check("name", "Name is required").not().isEmpty(),
+    check("lastname", "Lastname is required").not().isEmpty(),
     check("email", "Email is required").not().isEmpty(),
     check("email", "Email is not valid").isEmail(),
     check("email").custom(emailValidation),
@@ -27,7 +41,20 @@ routerUsers.post(
   ],
   createUser
 );
-routerUsers.put("/:id", updateUser);
+routerUsers.put(
+  "/:id",
+  [
+    check("id", "Id not valid").isMongoId(),
+    check("id").custom(userExists),
+    check("name", "Name is required").not().isEmpty(),
+    check("lastname", "Lastname is required").not().isEmpty(),
+    check("profileImage", "Profile image is required").not().isEmpty(),
+    check("role", "Role required").not().isEmpty(),
+    check("role").custom(roleValidation),
+    validateFields,
+  ],
+  updateUser
+);
 routerUsers.delete("/", deleteUser);
 
 module.exports = routerUsers;

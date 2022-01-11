@@ -15,7 +15,15 @@ const emailValidation = async (email) => {
   }
 };
 
+const userExists = async (id) => {
+  const existsUser = await User.findOne({ _id: id });
+  if (!existsUser) {
+    throw new Error(`User ${id} not exists`);
+  }
+};
+
 module.exports = {
   roleValidation,
   emailValidation,
+  userExists,
 };
