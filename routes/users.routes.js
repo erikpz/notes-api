@@ -1,10 +1,11 @@
 const { Router } = require("express");
-const { check, query } = require("express-validator");
+const { check, query, param } = require("express-validator");
 const {
   getUsers,
   createUser,
   updateUser,
   deleteUser,
+  getUser,
 } = require("../controllers/users.controller");
 const { validateFields } = require("../middlewares/validate-fields");
 const {
@@ -24,6 +25,13 @@ routerUsers.get(
   ],
   getUsers
 );
+
+routerUsers.get(
+  "/:id",
+  [param("id", "Id not valid").isMongoId(), validateFields],
+  getUser
+);
+
 routerUsers.post(
   "/",
   [
@@ -41,6 +49,7 @@ routerUsers.post(
   ],
   createUser
 );
+
 routerUsers.put(
   "/:id",
   [
@@ -55,6 +64,11 @@ routerUsers.put(
   ],
   updateUser
 );
-routerUsers.delete("/", deleteUser);
+
+routerUsers.delete(
+  "/:id",
+  [check("id", "Id not valid").isMongoId(), validateFields],
+  deleteUser
+);
 
 module.exports = routerUsers;
