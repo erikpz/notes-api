@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const connectionDb = require("../database/config");
 const routerUsers = require("../routes/users.routes");
+const routerAuth = require("../routes/auth.routes");
 const { handleErrors } = require("../middlewares/handle-errors");
 
 class Server {
@@ -26,6 +27,7 @@ class Server {
 
   routes() {
     this.app.use("/api/users", routerUsers);
+    this.app.use("/api/auth", routerAuth);
     this.app.use(handleErrors);
   }
 
