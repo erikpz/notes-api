@@ -8,6 +8,8 @@ const {
   getUser,
 } = require("../controllers/users.controller");
 const { validateFields } = require("../middlewares/validate-fields");
+const validateJWT = require("../middlewares/validate-jwt");
+const validateRole = require("../middlewares/validate-role");
 const {
   roleValidation,
   emailValidation,
@@ -15,6 +17,9 @@ const {
 } = require("../utils/db-validators");
 
 const routerUsers = Router();
+
+routerUsers.use(validateJWT);
+routerUsers.use(validateRole);
 
 routerUsers.get(
   "/",

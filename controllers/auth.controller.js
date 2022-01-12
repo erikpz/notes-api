@@ -1,7 +1,7 @@
 const { compareSync } = require("bcrypt");
 const { response } = require("express");
 const User = require("../models/user.model");
-const generateJWT = require("../utils/generateJWT");
+const generateJWT = require("../utils/generate-jwt");
 
 const login = async (req, res = response, next) => {
   try {
@@ -28,7 +28,7 @@ const login = async (req, res = response, next) => {
 
     const token = await generateJWT(user);
 
-    const { __v, role, email: em, password: pass, ...userFiltered } = user._doc;
+    const { __v, email: em, password: pass, ...userFiltered } = user._doc;
 
     res.json({
       ok: true,
