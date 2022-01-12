@@ -3,12 +3,18 @@ const cors = require("cors");
 const connectionDb = require("../database/config");
 const routerUsers = require("../routes/users.routes");
 const routerAuth = require("../routes/auth.routes");
+const routerNotes = require("../routes/notes.routes");
 const { handleErrors } = require("../middlewares/handle-errors");
 
 class Server {
   constructor() {
     this.app = express();
     this.port = process.env.PORT;
+    this.routesPath = {
+      auth: "/api/auth",
+      users: "/api/users",
+      notes: "/api/notes",
+    };
 
     this.database();
     this.middleware();
@@ -26,8 +32,9 @@ class Server {
   }
 
   routes() {
-    this.app.use("/api/users", routerUsers);
-    this.app.use("/api/auth", routerAuth);
+    this.app.use(this.routesPath.auth, routerAuth);
+    this.app.use(this.routesPath.users, routerUsers);
+    this.app.use(this.routesPath.notes, routerNotes);
     this.app.use(handleErrors);
   }
 
