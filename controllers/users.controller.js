@@ -23,6 +23,7 @@ const getUser = async (req, res = response, next) => {
     next(err);
   }
 };
+
 const getUsers = async (req, res = response, next) => {
   try {
     const { amount = 5, page = 0 } = req.query;
