@@ -29,6 +29,11 @@ const noteSchema = new Schema({
   },
 });
 
+noteSchema.methods.toJSON = function () {
+  const { __v, ...newNote } = this.toObject();
+  return newNote;
+};
+
 const Note = model("Note", noteSchema);
 
 module.exports = Note;

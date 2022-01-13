@@ -18,12 +18,13 @@ const {
 
 const routerUsers = Router();
 
-routerUsers.use(validateJWT);
-routerUsers.use(validateRole);
+/* routerUsers.use(validateJWT);
+routerUsers.use(validateRole); */
 
 routerUsers.get(
   "/",
   [
+    validateJWT,
     query("amount", "Must be an number").optional().isNumeric(),
     query("page", "Must be an number").optional().isNumeric(),
     validateFields,
@@ -33,7 +34,7 @@ routerUsers.get(
 
 routerUsers.get(
   "/:id",
-  [param("id", "Id not valid").isMongoId(), validateFields],
+  [validateJWT, param("id", "Id not valid").isMongoId(), validateFields],
   getUser
 );
 
@@ -58,6 +59,8 @@ routerUsers.post(
 routerUsers.put(
   "/:id",
   [
+    validateJWT,
+    validateRole,
     check("id", "Id not valid").isMongoId(),
     check("id").custom(userExists),
     check("name", "Name is required").not().isEmpty(),
@@ -72,7 +75,12 @@ routerUsers.put(
 
 routerUsers.delete(
   "/:id",
-  [check("id", "Id not valid").isMongoId(), validateFields],
+  [
+    validateJWT,
+    validateRole,
+    check("id", "Id not valid").isMongoId(),
+    validateFields,
+  ],
   deleteUser
 );
 
