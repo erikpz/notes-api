@@ -17,8 +17,14 @@ const getNotes = async (req, res = response, next) => {
 const getNote = async (req, res = response, next) => {
   try {
     const { id } = req.params;
-    console.log(id)
     const note = await Note.findById(id);
+    if (!note) {
+      return res.status(404).json({
+        ok: false,
+        message: "Note not found",
+        data: {},
+      });
+    }
     res.json({
       ok: true,
       message: "Your note",
@@ -50,8 +56,64 @@ const createNote = async (req, res = response, next) => {
   }
 };
 
+const updateNote = async (req, res = response, next) => {
+  try {
+    const { id } = req.params;
+    const { title, description, status } = req.body;
+    const note = await Note.findById(id);
+    if (!note) {
+      return res.status(404).json({
+        ok: false,
+        message: "Note not found",
+        data: {},
+      });
+    }
+    const noteUpdated = await Note.findByIdAndUpdate(
+      id,
+      {
+        title,
+        description,
+        status,
+        updatedAt: Date.now(),
+      },
+      { new: true }
+    );
+    res.json({
+      ok: true,
+      message: "Note updated",
+      data: noteUpdated,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteNote = async (req, res = response, next) => {
+  try {
+    const { id } = req.params;
+    const note = await Note.findById(id);
+    if (!note) {
+      return res.status(404).json({
+        ok: false,
+        message: "Note not found",
+        data: {},
+      });
+    }
+    const noteDeleted = await Note.findByIdAndDelete(id);
+    res.json({
+      ok: true,
+      message: "Note deleted",
+      data: noteDeleted,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getNote,
   getNotes,
   createNote,
+  updateNote,
+  deleteNote,
 };

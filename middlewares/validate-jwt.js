@@ -18,13 +18,20 @@ const validateJWT = async (req = request, res = response, next) => {
     if (!user) {
       return res.status(401).json({
         ok: false,
-        message: "User not found and autenticated",
+        message: "User not found and not autenticated",
         data: {},
       });
     }
     req.userPayload = payload;
     next();
   } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({
+        ok: false,
+        message: "Token expired",
+        data: {},
+      });
+    }
     next(err);
   }
 };

@@ -1,3 +1,4 @@
+const Note = require("../models/note.model");
 const Role = require("../models/role.model");
 const User = require("../models/user.model");
 
