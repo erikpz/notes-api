@@ -3,12 +3,26 @@ const Note = require("../models/note.model");
 
 const getNotes = async (req, res = response, next) => {
   try {
-    console.log(req.userPayload.id)
     const notes = await Note.find({ userId: req.userPayload.id });
     res.json({
       ok: true,
       message: "Your notes",
       data: notes,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getNote = async (req, res = response, next) => {
+  try {
+    const { id } = req.params;
+    console.log(id)
+    const note = await Note.findById(id);
+    res.json({
+      ok: true,
+      message: "Your note",
+      data: note,
     });
   } catch (err) {
     next(err);
@@ -37,6 +51,7 @@ const createNote = async (req, res = response, next) => {
 };
 
 module.exports = {
+  getNote,
   getNotes,
   createNote,
 };

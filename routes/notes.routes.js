@@ -1,12 +1,21 @@
 const { Router } = require("express");
-const { check } = require("express-validator");
-const { getNotes, createNote } = require("../controllers/notes.controller");
+const { check, param } = require("express-validator");
+const {
+  getNotes,
+  createNote,
+  getNote,
+} = require("../controllers/notes.controller");
 const { validateFields } = require("../middlewares/validate-fields");
 const validateJWT = require("../middlewares/validate-jwt");
 
 const notesRouter = Router();
 
 notesRouter.get("/", [validateJWT], getNotes);
+notesRouter.get(
+  "/:id",
+  [validateJWT, param("id", "Id not valid").isMongoId(), validateFields],
+  getNote
+);
 notesRouter.post(
   "/",
   [
