@@ -28,17 +28,16 @@ const login = async (req, res = response, next) => {
 
     const token = await generateJWT(user);
 
-    const { __v, email: em, password: pass, ...userFiltered } = user._doc;
-
     res.json({
       ok: true,
       message: "User autenticated",
       data: {
-        user: userFiltered,
+        user,
         token,
       },
     });
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };

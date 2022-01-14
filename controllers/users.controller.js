@@ -88,7 +88,7 @@ const updateUser = async (req, res = response, next) => {
         role,
       },
       {
-        returnDocument: "after",
+        new: true,
       }
     );
 

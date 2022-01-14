@@ -26,11 +26,13 @@ const noteSchema = new Schema({
   },
   updatedAt: {
     type: Date,
+    default: Date.now,
   },
 });
 
 noteSchema.methods.toJSON = function () {
-  const { __v, ...newNote } = this.toObject();
+  const { __v, _id, ...newNote } = this.toObject();
+  newNote.id = _id;
   return newNote;
 };
 
