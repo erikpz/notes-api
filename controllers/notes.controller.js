@@ -17,7 +17,10 @@ const getNotes = async (req, res = response, next) => {
 const getNote = async (req, res = response, next) => {
   try {
     const { id } = req.params;
-    const note = await Note.findById(id);
+    const note = await Note.findById(id).populate("userId", {
+      name: true,
+      lastname: true,
+    });
     if (!note) {
       return res.status(404).json({
         ok: false,
