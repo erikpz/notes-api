@@ -16,9 +16,9 @@ const validateJWT = async (req = request, res = response, next) => {
     const payload = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findById(payload.id);
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         ok: false,
-        message: "User not found and not autenticated",
+        message: "User not found",
         data: {},
       });
     }

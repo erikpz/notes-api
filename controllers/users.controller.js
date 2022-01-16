@@ -50,6 +50,7 @@ const getUsers = async (req, res = response, next) => {
 const createUser = async (req, res = response, next) => {
   try {
     const { name, lastname, email, password, role, profileImage } = req.body;
+
     const newUser = new User({
       name,
       lastname,
@@ -77,32 +78,70 @@ const createUser = async (req, res = response, next) => {
 const updateUser = async (req, res = response, next) => {
   try {
     const { id } = req.params;
-    const { name, lastname, profileImage, role } = req.body;
+    const { id: idJwt } = req.userPayload;
+    if (id === idJwt) {
+      const { name, lastname, profileImage } = req.body;
 
-    const userModified = await User.findByIdAndUpdate(
-      id,
-      {
-        name,
-        lastname,
-        profileImage,
-        role,
-      },
-      {
-        new: true,
-      }
-    );
+      const userModified = await User.findByIdAndUpdate(
+        id,
+        {
+          name,
+          lastname,
+          profileImage,
+        },
+        {
+          new: true,
+        }
+      );
 
-    res.json({
-      ok: true,
-      message: "User mofified",
-      data: userModified,
-    });
+      res.json({
+        ok: true,
+        message: "User mofified",
+        data: userModified,
+      });
+    } else {
+      res.status(400).json({
+        ok: true,
+        message: "Only same user autenticated",
+        data: {},
+      });
+    }
   } catch (err) {
     next(err);
   }
 };
 
 const deleteUser = async (req, res = response, next) => {
+  try {
+    const { id } = req.params;
+    const { id: idJwt } = req.userPayload;
+    if (id === idJwt) {
+      const userDeleted = await User.findByIdAndRemove(id);
+      if (!userDeleted) {
+        return res.status(404).json({
+          ok: false,
+          message: "User not found",
+          data: {},
+        });
+      }
+      res.json({
+        ok: true,
+        message: "User deleted",
+        data: userDeleted,
+      });
+    } else {
+      res.status(400).json({
+        ok: false,
+        message: "User must be the same",
+        data: {},
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteUserAdmin = async (req, res = response, next) => {
   try {
     const { id } = req.params;
     const userDeleted = await User.findByIdAndRemove(id);
@@ -129,4 +168,5 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  deleteUserAdmin,
 };

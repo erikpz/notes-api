@@ -6,15 +6,12 @@ const {
   updateUser,
   deleteUser,
   getUser,
+  deleteUserAdmin,
 } = require("../controllers/users.controller");
 const { validateFields } = require("../middlewares/validate-fields");
 const validateJWT = require("../middlewares/validate-jwt");
 const validateRole = require("../middlewares/validate-role");
-const {
-  roleValidation,
-  emailValidation,
-  userExists,
-} = require("../utils/db-validators");
+const { emailValidation, userExists } = require("../utils/db-validators");
 
 const routerUsers = Router();
 
@@ -25,6 +22,7 @@ routerUsers.get(
   "/",
   [
     validateJWT,
+    validateRole,
     query("amount", "Must be an number").optional().isNumeric(),
     query("page", "Must be an number").optional().isNumeric(),
     validateFields,
@@ -50,7 +48,29 @@ routerUsers.post(
       min: 5,
       max: 15,
     }),
-    check("role").custom(roleValidation),
+    check("role", "Invalid role, only user role permited").isIn(["USER_ROLE"]),
+    validateFields,
+  ],
+  createUser
+);
+
+routerUsers.post(
+  "/create-admin",
+  [
+    validateJWT,
+    validateRole,
+    check("name", "Name is required").not().isEmpty(),
+    check("lastname", "Lastname is required").not().isEmpty(),
+    check("email", "Email is required").not().isEmpty(),
+    check("email", "Email is not valid").isEmail(),
+    check("email").custom(emailValidation),
+    check("password", "Password must be min 5 characters, max 15").isLength({
+      min: 5,
+      max: 15,
+    }),
+    check("role", "Invalid role, only admin role permited").isIn([
+      "ADMIN_ROLE",
+    ]),
     validateFields,
   ],
   createUser
@@ -60,14 +80,26 @@ routerUsers.put(
   "/:id",
   [
     validateJWT,
-    validateRole,
     check("id", "Id not valid").isMongoId(),
-    check("id").custom(userExists),
+    check("id", "User not exists").custom(userExists),
     check("name", "Name is required").not().isEmpty(),
     check("lastname", "Lastname is required").not().isEmpty(),
     check("profileImage", "Profile image is required").not().isEmpty(),
-    check("role", "Role required").not().isEmpty(),
-    check("role").custom(roleValidation),
+    validateFields,
+  ],
+  updateUser
+);
+
+routerUsers.put(
+  "/update-admin/:id",
+  [
+    validateJWT,
+    validateRole,
+    param("id", "Id not valid").isMongoId(),
+    param("id", "User not exists").custom(userExists),
+    check("name", "Name is required").not().isEmpty(),
+    check("lastname", "Lastname is required").not().isEmpty(),
+    check("profileImage", "Profile image is required").not().isEmpty(),
     validateFields,
   ],
   updateUser
@@ -75,13 +107,19 @@ routerUsers.put(
 
 routerUsers.delete(
   "/:id",
+  [validateJWT, check("id", "Id not valid").isMongoId(), validateFields],
+  deleteUser
+);
+
+routerUsers.delete(
+  "/delete-admin/:id",
   [
     validateJWT,
     validateRole,
     check("id", "Id not valid").isMongoId(),
     validateFields,
   ],
-  deleteUser
+  deleteUserAdmin
 );
 
 module.exports = routerUsers;

@@ -11,7 +11,7 @@ const validateRole = (req = request, res = response, next) => {
   if (req.userPayload.role !== "ADMIN_ROLE") {
     return res.status(400).json({
       ok: false,
-      message: "Only admin role permited",
+      message: "Only admin role",
       data: {},
     });
   }
