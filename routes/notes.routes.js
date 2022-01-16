@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { check, param } = require("express-validator");
+const { check, param, query } = require("express-validator");
 const {
   getNotes,
   createNote,
@@ -9,7 +9,6 @@ const {
 } = require("../controllers/notes.controller");
 const { validateFields } = require("../middlewares/validate-fields");
 const validateJWT = require("../middlewares/validate-jwt");
-const { noteExists } = require("../utils/db-validators");
 
 const notesRouter = Router();
 

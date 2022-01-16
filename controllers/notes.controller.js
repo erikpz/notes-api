@@ -3,7 +3,12 @@ const Note = require("../models/note.model");
 
 const getNotes = async (req, res = response, next) => {
   try {
-    const notes = await Note.find({ userId: req.userPayload.id });
+    const { search = "" } = req.query;
+    const regexSearch = new RegExp(search, "i");
+    const notes = await Note.find({
+      userId: req.userPayload.id,
+      $or: [{ title: regexSearch }, { description: regexSearch }],
+    });
     res.json({
       ok: true,
       message: "Your notes",

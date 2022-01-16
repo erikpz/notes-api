@@ -1,6 +1,7 @@
 const { response } = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
+const Note = require("../models/note.model");
 
 const getUser = async (req, res = response, next) => {
   try {
@@ -116,6 +117,7 @@ const deleteUser = async (req, res = response, next) => {
     const { id } = req.params;
     const { id: idJwt } = req.userPayload;
     if (id === idJwt) {
+      await Note.deleteMany({ userId: idJwt });
       const userDeleted = await User.findByIdAndRemove(id);
       if (!userDeleted) {
         return res.status(404).json({
@@ -144,6 +146,7 @@ const deleteUser = async (req, res = response, next) => {
 const deleteUserAdmin = async (req, res = response, next) => {
   try {
     const { id } = req.params;
+    await Note.deleteMany({ userId: id });
     const userDeleted = await User.findByIdAndRemove(id);
     if (!userDeleted) {
       return res.status(404).json({
