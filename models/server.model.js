@@ -4,7 +4,9 @@ const connectionDb = require("../database/config");
 const routerUsers = require("../routes/users.routes");
 const routerAuth = require("../routes/auth.routes");
 const routerNotes = require("../routes/notes.routes");
+const routerUploads = require("../routes/uploads.routes");
 const { handleErrors } = require("../middlewares/handle-errors");
+const fileUpload = require("express-fileupload");
 
 class Server {
   constructor() {
@@ -14,6 +16,7 @@ class Server {
       auth: "/api/auth",
       users: "/api/users",
       notes: "/api/notes",
+      uploads: "/api/uploads",
     };
 
     this.database();
@@ -29,12 +32,20 @@ class Server {
     this.app.use(cors());
     this.app.use(express.json());
     this.app.use(express.static(__dirname + "/public"));
+    this.app.use(
+      fileUpload({
+        useTempFiles: true,
+        tempFileDir: "/tmp/",
+        createParentPath: true,
+      })
+    );
   }
 
   routes() {
     this.app.use(this.routesPath.auth, routerAuth);
     this.app.use(this.routesPath.users, routerUsers);
     this.app.use(this.routesPath.notes, routerNotes);
+    this.app.use(this.routesPath.uploads, routerUploads);
     this.app.use(handleErrors);
   }
 
