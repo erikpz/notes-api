@@ -2,6 +2,8 @@ const { response } = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
 const Note = require("../models/note.model");
+const cloudinary = require("cloudinary").v2;
+cloudinary.config(process.env.CLOUDINARY_URL);
 
 const getUser = async (req, res = response, next) => {
   try {
@@ -50,7 +52,13 @@ const getUsers = async (req, res = response, next) => {
 
 const createUser = async (req, res = response, next) => {
   try {
-    const { name, lastname, email, password, role, profileImage } = req.body;
+    const { name, lastname, email, password, role } = req.body;
+    let profileImage = req.files?.profileImage;
+
+    if (!profileImage) {
+      profileImage =
+        "https://res.cloudinary.com/dsfx3uehr/image/upload/v1642885698/no-image_y3oxlz.jpg";
+    }
 
     const newUser = new User({
       name,
@@ -63,6 +71,15 @@ const createUser = async (req, res = response, next) => {
 
     const salt = bcrypt.genSaltSync();
     newUser.password = bcrypt.hashSync(password, salt);
+
+    if (profileImage) {
+      const { tempFilePath } = profileImage;
+      const { secure_url } = await cloudinary.uploader.upload(tempFilePath, {
+        folder: newUser.id,
+      });
+
+      newUser.profileImage = secure_url;
+    }
 
     await newUser.save();
 
