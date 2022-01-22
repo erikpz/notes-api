@@ -7,6 +7,7 @@ const {
   deleteUser,
   getUser,
   deleteUserAdmin,
+  updatePassword,
 } = require("../controllers/users.controller");
 const { validateFields } = require("../middlewares/validate-fields");
 const validateJWT = require("../middlewares/validate-jwt");
@@ -77,14 +78,27 @@ routerUsers.post(
 );
 
 routerUsers.put(
+  "/update-password",
+  [
+    validateJWT,
+    check("newPassword", "New password is required").not().isEmpty(),
+    check("password", "Password is required").not().isEmpty(),
+    validateFields,
+  ],
+  updatePassword
+);
+
+routerUsers.put(
   "/:id",
   [
     validateJWT,
     check("id", "Id not valid").isMongoId(),
     check("id", "User not exists").custom(userExists),
     check("name", "Name is required").not().isEmpty(),
+    check("email", "Email is required").not().isEmpty(),
+    check("email", "Email is not valid").isEmail(),
+    check("email").custom(emailValidation),
     check("lastname", "Lastname is required").not().isEmpty(),
-    check("profileImage", "Profile image is required").not().isEmpty(),
     validateFields,
   ],
   updateUser

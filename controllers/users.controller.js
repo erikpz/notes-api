@@ -98,14 +98,14 @@ const updateUser = async (req, res = response, next) => {
     const { id } = req.params;
     const { id: idJwt } = req.userPayload;
     if (id === idJwt) {
-      const { name, lastname, profileImage } = req.body;
+      const { name, lastname, email } = req.body;
 
       const userModified = await User.findByIdAndUpdate(
         id,
         {
           name,
           lastname,
-          profileImage,
+          email,
         },
         {
           new: true,
@@ -143,13 +143,13 @@ const deleteUser = async (req, res = response, next) => {
           data: {},
         });
       }
-      res.json({
+      return res.json({
         ok: true,
         message: "User deleted",
         data: userDeleted,
       });
     } else {
-      res.status(400).json({
+      return res.status(400).json({
         ok: false,
         message: "User must be the same",
         data: {},
@@ -182,6 +182,47 @@ const deleteUserAdmin = async (req, res = response, next) => {
   }
 };
 
+const updatePassword = async (req, res = response, next) => {
+  try {
+    const { id } = req.userPayload;
+    const { newPassword, password } = req.body;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        message: "User not found",
+        data: {},
+      });
+    }
+
+    const validOldPass = bcrypt.compareSync(password, user.password);
+
+    if (!validOldPass) {
+      return res.status(400).json({
+        ok: false,
+        message: "Old password not valid",
+        data: {},
+      });
+    }
+
+    const salt = bcrypt.genSaltSync();
+    const newPassCryp = bcrypt.hashSync(newPassword, salt);
+    user.password = newPassCryp;
+
+    await user.save();
+
+    res.json({
+      ok: true,
+      message: "Password updated",
+      data: { user, newPassCryp },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getUser,
   getUsers,
@@ -189,4 +230,5 @@ module.exports = {
   updateUser,
   deleteUser,
   deleteUserAdmin,
+  updatePassword,
 };
